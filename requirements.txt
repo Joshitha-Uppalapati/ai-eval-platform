@@ -2,4 +2,4 @@ pyyaml
 matplotlib
 fastapi
 uvicorn
-
+pytest
