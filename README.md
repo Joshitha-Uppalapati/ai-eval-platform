@@ -122,3 +122,8 @@ python3 src/list_runs.py
 ```bash
 python3 src/export_csv.py
 ```
+
+---
+
+## API Interface
+This platform exposes a local FastAPI service for triggering experiments and retrieving evaluation results programmatically.
