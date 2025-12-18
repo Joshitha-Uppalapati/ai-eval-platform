@@ -1,34 +1,39 @@
-import json
 from typing import Dict
+from evaluation.base import BaseJudge
 
 
-def mock_judge(
-    prediction: str,
-    reference: str
-) -> Dict:
+class MockJudge(BaseJudge):
+    name = "mock"
+    version = "mock-v1"
 
-    if prediction.strip() == reference.strip():
-        verdict = "pass"
-        score = 1.0
-        reason = "Prediction exactly matches reference."
-    elif prediction.strip() in reference.strip() or reference.strip() in prediction.strip():
-        verdict = "partial"
-        score = 0.5
-        reason = "Prediction partially matches reference."
-    else:
-        verdict = "fail"
-        score = 0.0
-        reason = "Prediction does not match reference."
+    def evaluate(self, prediction: str, reference: str) -> Dict:
+        if prediction == reference:
+            return {
+                "score": 1.0,
+                "verdict": "pass",
+                "reason": "Prediction exactly matches reference.",
+                "judge_version": self.version,
+            }
 
-    return {
-        "score": score,
-        "verdict": verdict,
-        "reason": reason,
-        "judge_version": "mock-v1"
-    }
+        if prediction in reference or reference in prediction:
+            return {
+                "score": 0.5,
+                "verdict": "partial",
+                "reason": "Prediction partially matches reference.",
+                "judge_version": self.version,
+            }
+
+        return {
+            "score": 0.0,
+            "verdict": "fail",
+            "reason": "Prediction does not match reference.",
+            "judge_version": self.version,
+        }
 
 
-def save_judgment(judgment: Dict, output_path: str) -> None:
-    with open(output_path, "w") as f:
-        json.dump(judgment, f, indent=2)
+def get_judge(judge_type: str = "mock") -> BaseJudge:
+    if judge_type == "mock":
+        return MockJudge()
+
+    raise ValueError(f"Unknown judge type: {judge_type}")
 

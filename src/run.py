@@ -6,7 +6,7 @@ import yaml
 import csv
 import sys
 
-from evaluation.judge import mock_judge
+from evaluation.judge import get_judge
 
 
 def main():
@@ -31,6 +31,9 @@ def main():
     epochs = config["epochs"]
     learning_rate = config["learning_rate"]
     threshold = config.get("threshold", 0.5)
+    judge_type = config.get("judge", {}).get("type", "mock")
+    judge = get_judge(judge_type)
+
 
     # copy config into run
     shutil.copy(config_path, run_dir / "config.yaml")
@@ -62,7 +65,7 @@ def main():
             total += 1
 
             # judge evaluation
-            judge_result = mock_judge(str(prediction), str(label))
+            judge_result = judge.evaluate(str(prediction), str(label))
             judge_scores.append(judge_result["score"])
             judge_verdicts[judge_result["verdict"]] += 1
 
