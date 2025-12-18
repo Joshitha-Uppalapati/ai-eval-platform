@@ -6,6 +6,8 @@ import yaml
 import csv
 import sys
 
+from evaluation.judge import mock_judge
+
 
 def main():
     # choose config
@@ -38,6 +40,14 @@ def main():
     correct = 0
     total = 0
 
+    # judge tracking
+    judge_scores = []
+    judge_verdicts = {
+        "pass": 0,
+        "partial": 0,
+        "fail": 0,
+    }
+
     with open(data_path) as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -45,17 +55,28 @@ def main():
             label = int(row["label"])
 
             prediction = 1 if x > threshold else 0
+
+            # accuracy metric
             if prediction == label:
                 correct += 1
             total += 1
 
+            # judge evaluation
+            judge_result = mock_judge(str(prediction), str(label))
+            judge_scores.append(judge_result["score"])
+            judge_verdicts[judge_result["verdict"]] += 1
+
     accuracy = round(correct / total, 4)
+    avg_judge_score = round(sum(judge_scores) / len(judge_scores), 4)
 
     metrics = {
         "accuracy": accuracy,
         "epochs": epochs,
         "learning_rate": learning_rate,
-        "threshold": threshold
+        "threshold": threshold,
+        "judge_score": avg_judge_score,
+        "judge_breakdown": judge_verdicts,
+        "judge_version": "mock-v1",
     }
 
     with open(run_dir / "metrics.json", "w") as f:
@@ -65,7 +86,8 @@ def main():
         f"Run {timestamp} | "
         f"config={config_path.name}, "
         f"threshold={threshold}, "
-        f"accuracy={accuracy}"
+        f"accuracy={accuracy}, "
+        f"judge_score={avg_judge_score}"
     )
 
 
