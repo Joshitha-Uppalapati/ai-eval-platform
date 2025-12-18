@@ -28,7 +28,7 @@ def main():
 
     epochs = config["epochs"]
     learning_rate = config["learning_rate"]
-    threshold = config["threshold"]
+    threshold = config.get("threshold", 0.5)
 
     # copy config into run
     shutil.copy(config_path, run_dir / "config.yaml")
