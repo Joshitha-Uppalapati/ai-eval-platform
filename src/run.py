@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 from datetime import datetime
 import shutil
@@ -6,7 +7,6 @@ import yaml
 
 
 def compute_accuracy(y_true, y_pred):
-    """Compute accuracy as correct / total."""
     correct = 0
     for t, p in zip(y_true, y_pred):
         if t == p:
@@ -15,12 +15,20 @@ def compute_accuracy(y_true, y_pred):
 
 
 def main():
+    # read config path from command line (optional)
+    if len(sys.argv) > 1:
+        config_path = Path(sys.argv[1])
+    else:
+        config_path = Path("configs/default.yaml")
+
+    if not config_path.exists():
+        raise FileNotFoundError(f"Config not found: {config_path}")
+
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     run_dir = Path("runs") / timestamp
     run_dir.mkdir(parents=True, exist_ok=True)
 
     # load config
-    config_path = Path("configs/default.yaml")
     with open(config_path) as f:
         config = yaml.safe_load(f)
 
@@ -47,9 +55,11 @@ def main():
 
     print(
         f"Run {timestamp} | "
+        f"config={config_path.name}, "
         f"epochs={epochs}, lr={learning_rate}, accuracy={accuracy}"
     )
 
 
 if __name__ == "__main__":
     main()
+
