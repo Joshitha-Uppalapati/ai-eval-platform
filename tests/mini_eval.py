@@ -15,7 +15,7 @@ def run(cmd):
 
 
 def main():
-    run(["python3", "src/run.py", "configs/exp_epochs_5.yaml"])
+    run(["python3", "-m", "src.run", "configs/exp_epochs_5.yaml"])
     run(["python3", "src/export_csv.py"])
     run(["python3", "src/analyze_results.py"])
     run(["python3", "src/compare_experiments.py"])
