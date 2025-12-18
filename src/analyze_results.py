@@ -2,33 +2,32 @@ import csv
 from pathlib import Path
 import matplotlib.pyplot as plt
 
-CSV_PATH = Path("experiments.csv")
-OUTPUT_DIR = Path("analysis")
-PLOT_PATH = OUTPUT_DIR / "accuracy_vs_threshold.png"
+EXPERIMENTS_CSV = Path("experiments.csv")
+ANALYSIS_DIR = Path("analysis")
+PLOT_PATH = ANALYSIS_DIR / "accuracy_vs_threshold.png"
 
 
 def main():
-    rows = []
+    ANALYSIS_DIR.mkdir(exist_ok=True)
 
-    with open(CSV_PATH) as f:
+    rows = []
+    with open(EXPERIMENTS_CSV, newline="") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            # Skip rows without threshold
-            if not row.get("threshold"):
-                continue
-
-            rows.append({
-                "run_id": row["run_id"],
-                "accuracy": float(row["accuracy"]),
-                "threshold": float(row["threshold"]),
-            })
+            if row.get("threshold"):
+                rows.append({
+                    "run_id": row["run_id"],
+                    "accuracy": float(row["accuracy"]),
+                    "threshold": float(row["threshold"])
+                })
 
     if not rows:
         print("No runs with threshold found.")
         return
 
-    
     accuracies = [r["accuracy"] for r in rows]
+    thresholds = [r["threshold"] for r in rows]
+
     best = max(rows, key=lambda r: r["accuracy"])
     worst = min(rows, key=lambda r: r["accuracy"])
     avg_accuracy = sum(accuracies) / len(accuracies)
@@ -37,17 +36,41 @@ def main():
     print("-" * 20)
     print(f"Total analyzed runs: {len(rows)}")
     print(f"Average accuracy: {avg_accuracy:.4f}")
-    print(f"Best run: {best['run_id']} (accuracy={best['accuracy']}, threshold={best['threshold']})")
-    print(f"Worst run: {worst['run_id']} (accuracy={worst['accuracy']}, threshold={worst['threshold']})")
+    print(
+        f"Best run: {best['run_id']} "
+        f"(accuracy={best['accuracy']}, threshold={best['threshold']})"
+    )
+    print(
+        f"Worst run: {worst['run_id']} "
+        f"(accuracy={worst['accuracy']}, threshold={worst['threshold']})"
+    )
 
-    thresholds = [r["threshold"] for r in rows]
-    accuracies = [r["accuracy"] for r in rows]
+    # -------- Plot --------
+    plt.figure(figsize=(6, 4))
 
-    plt.figure()
-    plt.scatter(thresholds, accuracies)
+    plt.scatter(
+        thresholds,
+        accuracies,
+        s=80,
+        alpha=0.8
+    )
+
+    best_accuracy = max(accuracies)
+    plt.axhline(
+        y=best_accuracy,
+        linestyle="--",
+        linewidth=1,
+        label=f"Best accuracy = {best_accuracy:.2f}"
+    )
+
     plt.xlabel("Threshold")
     plt.ylabel("Accuracy")
     plt.title("Accuracy vs Threshold")
+
+    plt.grid(True, linestyle="--", alpha=0.4)
+    plt.legend()
+    plt.tight_layout()
+
     plt.savefig(PLOT_PATH)
     plt.close()
 
