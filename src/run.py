@@ -2,8 +2,17 @@ from pathlib import Path
 from datetime import datetime
 import shutil
 import json
-import random
 import yaml
+
+
+def compute_accuracy(y_true, y_pred):
+    """Compute accuracy as correct / total."""
+    correct = 0
+    for t, p in zip(y_true, y_pred):
+        if t == p:
+            correct += 1
+    return correct / len(y_true)
+
 
 def main():
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -21,9 +30,11 @@ def main():
     # copy config into run
     shutil.copy(config_path, run_dir / "config.yaml")
 
-    # fake metric influenced by config (on purpose)
-    base = random.uniform(0.6, 0.7)
-    accuracy = round(base + epochs * 0.01 - learning_rate, 4)
+    # fake data, real evaluation logic
+    y_true = [1, 0, 1, 1, 0, 1, 0, 0]
+    y_pred = [1, 1, 1, 0, 0, 1, 0, 1]
+
+    accuracy = round(compute_accuracy(y_true, y_pred), 4)
 
     metrics = {
         "accuracy": accuracy,
@@ -39,6 +50,6 @@ def main():
         f"epochs={epochs}, lr={learning_rate}, accuracy={accuracy}"
     )
 
+
 if __name__ == "__main__":
     main()
-
