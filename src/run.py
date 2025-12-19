@@ -109,6 +109,12 @@ def main():
         f"decision={metrics['decision']}"
     )
 
+    # CI enforcement (Stage 12)
+    if metrics["decision"] == "FAIL":
+        sys.exit(1)
+    else:
+        sys.exit(0)
+
 
 if __name__ == "__main__":
     main()
